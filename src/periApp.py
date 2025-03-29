@@ -9,7 +9,7 @@ import colorama
 colorama.init(strip=False)
 
 __tk_config = {
-    "interpreter": "peri.1.0"
+    "interpreter": "1.1"
 }
 
 isIde = 0
