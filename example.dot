@@ -1,1 +1,19 @@
-display "this is an example -- this will be the only function till tmrw!"
+$ this will be your example.
+$ the symbol for making comments is the dollar sign, like i am typing right now.
+
+$ i also reccomend you make a new project so you can run code directly from buttons!
+
+$ if you run launch.bat and open this file from the launcher then the console will show up where-ever you put it last time.
+$ also, it's optional if you just wanna type "python .peri\\installations\\peri.1.0.py example.dot".
+
+$ printing? try this:
+display "hello, world!"
+$ this should display hello world. 
+
+$ defining something? try this:
+
+mystring = "hello, world!"
+myinteger = 123
+
+$ now you can or embed it to a string:
+display "mystring is: ${mystring}" 
