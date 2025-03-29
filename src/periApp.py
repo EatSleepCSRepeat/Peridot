@@ -1,27 +1,40 @@
 import tkinter as tk
 import os
 import json
+import requests
 from tkinter import simpledialog
 from tkinter import messagebox
 import shutil
+import colorama
+colorama.init(strip=False)
+
 __tk_config = {
     "interpreter": "peri.1.0"
 }
-isIde = False
+
+isIde = 0
+isIde_ = 0
+
 def __run_peri_main__():
+    global isIde 
     File = simpledialog.askstring("File", "Enter .dot to run.")
     
     if File:
         file_path = os.path.abspath(File)
         cmd = f'python "{os.path.join(".", ".peri", "installations", __tk_config.get("interpreter") + ".py")}" "{file_path}"'
+        isIde += 1 
+        print(colorama.Style.BRIGHT + colorama.Fore.MAGENTA + "Running Peridot with sesID " + str(isIde) + colorama.Style.RESET_ALL)
         os.system(cmd)
 
 def __run_peri__(version):
+    global isIde 
     File = simpledialog.askstring("File", "Enter .dot to run.")
     
     if File:
         file_path = os.path.abspath(File)
         cmd = f'python "{os.path.join(".", ".peri", "installations", version + ".py")}" "{file_path}"'
+        isIde += 1 
+        print(colorama.Style.BRIGHT + colorama.Fore.MAGENTA + "Running Peridot with sesID " + str(isIde) + colorama.Style.RESET_ALL)
         os.system(cmd)
 
 def __new_project__():
@@ -96,8 +109,10 @@ def load_projects(npl):
     return project_buttons
 
 def __run_project(project):
+    global isIde_
     base_path = os.path.abspath(os.path.join(".peri", "projects"))
-    
+    isIde_ += 1 
+    print(colorama.Style.BRIGHT + colorama.Fore.MAGENTA + "Running " + str(project) + " with sesID " + str(isIde_) + colorama.Style.RESET_ALL)
     project_path = os.path.join(base_path, project)
     
     if not os.path.exists(project_path):
@@ -116,9 +131,38 @@ def __run_project(project):
         raise ValueError("The project.json file does not contain a 'main' key.")
     with open(".\\.peri\\config.json", 'r') as fl:
         _cfg = json.load(fl)
-    cmd = f"python {os.path.join(".peri", "installations", _cfg.get("interpreter") + ".py")} {os.path.join(project_path, main_script)}"
+    cmd = f"python {os.path.join('.peri', 'installations', _cfg.get('interpreter') + '.py')} {os.path.join(project_path, main_script)}"
     
     os.system(cmd)
+
+def add_interpreter():
+    release_version = simpledialog.askstring("Add Interpreter", "Enter the version of the interpreter you want to add:")
+    
+    if release_version:
+        releases_url = f"https://api.github.com/repos/EatSleepCSRepeat/peridot-installations/releases"
+        response = requests.get(releases_url)
+        
+        if response.status_code == 200:
+            releases = response.json()
+            found = False
+            for release in releases:
+                if release["tag_name"] == release_version:
+                    download_url = release["assets"][0]["browser_download_url"]
+                    download_file = os.path.join(".peri", "installations", f"peri.{release_version}.py")
+                    with requests.get(download_url, stream=True) as rfile:
+                        if rfile.status_code == 200:
+                            with open(download_file, "wb") as f:
+                                for chunk in rfile.iter_content(chunk_size=8192):
+                                    f.write(chunk)
+                            print(f"Interpreter {release_version} added successfully.")
+                            found = True
+                            break
+            if not found:
+                print(f"No release found for {release_version}.")
+        else:
+            print(f"Failed to fetch releases. Status code: {response.status_code}")
+
+
 def app():
     global __app__
     __app__ = tk.Tk()
@@ -147,6 +191,9 @@ def app():
     else:
         button = tk.Button(isl, text="No main interpreter")
         button.pack(fill=tk.X, padx=10, pady=_pady)
+
+    add_interpreter_button = tk.Button(isl, text="Add Interpreter", command=add_interpreter)
+    add_interpreter_button.pack(fill=tk.X, padx=10, pady=_pady)
 
     for file in files:
         version = file[:-3]
